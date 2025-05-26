@@ -35,7 +35,7 @@ public with sharing class SOQL {
 	 * Update the corresponding test class and testGetAllLeads method to cover this method
 	 */
 	public static List<Lead> getAllLeads() {
-	return [SELECT Id, LastName, Company, Phone, Email FROM Lead];
+	return [SELECT Id, LastName, Company, Phone, Email FROM Lead WITH SECURITY_ENFORCED];
 	}
 
 
@@ -47,7 +47,7 @@ public with sharing class SOQL {
 	 * Update the corresponding test class and testGetContactsByFirstName method to cover this method
 	 */
 	public static List<Contact> getContactByFirstName() {
-	return [SELECT Id, FirstName, Name FROM Contact WHERE FirstName = 'John'];
+	return [SELECT Id, FirstName, Name FROM Contact WHERE FirstName = 'John' WITH SECURITY_ENFORCED];
 	}
 
 	/**
