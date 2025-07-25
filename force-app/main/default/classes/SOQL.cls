@@ -320,7 +320,13 @@ public with sharing class SOQL {
 	 * @return The Account Name of the Contact.
 	 */
 	public static String getAccountNameForContact(String contactId) {
-		return null; // Replace null with the variable you used to store the result
+		Contact c = [SELECT Account.Name FROM Contact Where Id = :contactId];
+	 if (c.Account != null) {
+        return c.Account.Name;
+    } else {
+        return null; // or return 'No Account' or throw an exception, depending on your use case
+    }
+		
 	}
 
 	/**
