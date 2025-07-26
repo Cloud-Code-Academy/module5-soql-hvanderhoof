@@ -444,7 +444,8 @@ public static List<Account> findAccountsByLeadEmailDomains(Set<Id> leadIds) {
 	 * @return A list of filtered Opportunity
 	 */
 	public static List<Opportunity> getOpportunityDetailsForClosedWon() {
-		return null; // Replace null with the variable you used to store the result
+		List<Opportunity> closedWonOpps = [SELECT Name, Account.Name, Owner.Name FROM Opportunity Where StageName = 'Closed Won'];
+		return closedWonOpps; // Replace null with the variable you used to store the result
 	}
 
 	/**
@@ -454,18 +455,49 @@ public static List<Account> findAccountsByLeadEmailDomains(Set<Id> leadIds) {
 	 * Example: if there are two Contacts on the Account, "Billy" and "Abby," the 'Primary_Contact__c' will be set to "Abby."
 	 */
 	public static void setPrimaryContact() {
-		//Use the getOpportunityDetailsForClosedWon() method to get the Opportunities
+    // Get Closed Won Opportunities
+    List<Opportunity> closedWonOpps = getOpportunityDetailsForClosedWon();
 
-		// Create a set of Account Ids from the Opportunities
+    // Create a set of Account Ids from the Opportunities
+    Set<Id> accountIds = new Set<Id>();
+    for (Opportunity opp : closedWonOpps) {
+        if (opp.AccountId != null) {
+            accountIds.add(opp.AccountId);
+        }
+    }
 
-		// Query the Contacts
+    // Query the Contacts on those Accounts
+    List<Contact> contacts = [
+        SELECT Id, FirstName, AccountId
+        FROM Contact
+        WHERE AccountId IN :accountIds
+    ];
 
-		// Loop through each Contact and add the Account Id and Contact to the map
+    // Map to store the alphabetically first contact per Account
+    Map<Id, Contact> accountToContactMap = new Map<Id, Contact>();
 
-		// Loop through each Opportunity
+    for (Contact c : contacts) {
+        if (c.FirstName == null) continue;
+        if (!accountToContactMap.containsKey(c.AccountId)) {
+            accountToContactMap.put(c.AccountId, c);
+        } else {
+            Contact existing = accountToContactMap.get(c.AccountId);
+            if (c.FirstName.toLowerCase() < existing.FirstName.toLowerCase()) {
+                accountToContactMap.put(c.AccountId, c);
+            }
+        }
+    }
 
-		// Update the Opportunity primary contact from accountToContactMap
+    // Set the Primary_Contact__c field for each Opportunity
+    for (Opportunity opp : closedWonOpps) {
+        Contact primaryContact = accountToContactMap.get(opp.AccountId);
+        if (primaryContact != null) {
+            opp.Primary_Contact__c = primaryContact.Id;
+        }
+    }
 
-		// Update the Opportunities
-	}
+    // Update the Opportunities
+    update closedWonOpps;
+}
+
 }
