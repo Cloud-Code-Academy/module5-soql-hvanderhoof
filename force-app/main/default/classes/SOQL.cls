@@ -367,29 +367,40 @@ public with sharing class SOQL {
 	}
 
 	/**
-	 * Question 22
-	 * Extracts email domains from them leads, then finds Accounts with matching website domains
-	 * If Lead Email = test@test.com return account with website = www.test.com
-	 * Example: findAccountsByLeadEmailDomains([set of lead ids]) should return a list of Accounts with matching email domains
-	 * @param A set of Lead Ids.
-	 * @return A list of Accounts with matching email domains.
-	 */
-	public static List<Account> findAccountsByLeadEmailDomains(Set<Id> leadIds) {
-		// Query the Leads
+ * Question 22
+ * Extracts email domains from the leads, then finds Accounts with matching website domains
+ * If Lead Email = test@test.com return account with website = www.test.com
+ * @param leadIds A set of Lead Ids.
+ * @return A list of Accounts with matching email domains.
+ */
+public static List<Account> findAccountsByLeadEmailDomains(Set<Id> leadIds) {
+	// Query the Leads
+	List<Lead> leadsEmail = [SELECT Email FROM Lead WHERE Id IN :leadIds];
 
-		// Create a set of email domains from the Leads
-
-		// Loop through each Lead
-
-		// Get the email from the Lead
-
-		// Check if the email is not null
-
-		// Add the email domain to the set
-
-		// Query the Accounts
-		return null; // Replace null with the variable you used to store the result
+	// Create a set of email domains from the Leads
+	Set<String> emailDomains = new Set<String>();
+	for (Lead l : leadsEmail) {
+		if (l.Email != null && l.Email.contains('@')) {
+			String domain = l.Email.split('@')[1].toLowerCase();
+			emailDomains.add(domain);
+		}
 	}
+
+	// Prepare list to collect matching Accounts
+	List<Account> matchingAccts = new List<Account>();
+
+	// For each domain, query matching accounts
+	for (String domain : emailDomains) {
+		List<Account> accounts = [
+			SELECT Id, Name, Website
+			FROM Account
+			WHERE Website != null AND Website LIKE :('%' + domain + '%')
+		];
+		matchingAccts.addAll(accounts);
+	}
+
+	return matchingAccts;
+}
 
 	/**
 	 * Question 23
