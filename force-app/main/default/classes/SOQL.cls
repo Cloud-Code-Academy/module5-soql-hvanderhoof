@@ -402,30 +402,41 @@ public static List<Account> findAccountsByLeadEmailDomains(Set<Id> leadIds) {
 	return matchingAccts;
 }
 
-	/**
-	 * Question 23
-	 * Clones and Inserts Opportunity Line Items from an original Opportunity to a list of cloned Opportunities.
-	 * Adds a randomized number between 1 to 3 to the quantity of each line item.
-	 * Example: cloneLineItems('001XXXXXXXXXXXX', [list of opportunity ids]) should clone the line items from the 
-	 * Opportunity with the Id to each Opportunity in the list
-	 * @param Original Opportunity Id
-	 * @param List of cloned Opportunity Ids
-	 */
 	public static void cloneLineItems(Id origOppId, List<Id> cloneOppIds) {
-		// Query the original Opportunity Line Items
+	// Query the original Opportunity Line Items
+	List<OpportunityLineItem> originalLineItems = [
+		SELECT Quantity, UnitPrice, PricebookEntryId
+		FROM OpportunityLineItem
+		WHERE OpportunityId = :origOppId
+	];
 
-		// Create a list to hold the new line items
+	List<OpportunityLineItem> newLineItems = new List<OpportunityLineItem>();
 
-		// Generate a random number between 1 and 3
-
-		// Loop through each cloned Opportunity Id
-
+	// Loop through each cloned Opportunity Id
+	for (Id cloneOppId : cloneOppIds) {
 		// Loop through each original line item
+		for (OpportunityLineItem oli : originalLineItems) {
+			// Generate a random number between 1 and 3
+			Integer randomAdd = Math.mod(Crypto.getRandomInteger(), 3) + 1;
 
-		// Clone the original line item and add the random number to the quantity
+			// Clone the original line item
+			OpportunityLineItem newOli = new OpportunityLineItem(
+				OpportunityId = cloneOppId,
+				Quantity = oli.Quantity + randomAdd,
+				UnitPrice = oli.UnitPrice,
+				PricebookEntryId = oli.PricebookEntryId
+			);
 
-		// Insert the new line items
+			newLineItems.add(newOli);
+		}
 	}
+
+	// Insert the new line items
+	if (!newLineItems.isEmpty()) {
+		insert newLineItems;
+	}
+}
+
 
 	/**
 	 * Question 24
