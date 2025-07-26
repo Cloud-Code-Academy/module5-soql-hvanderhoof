@@ -351,17 +351,19 @@ public with sharing class SOQL {
 	/**
 	 * Question 21
 	 * Retrieves all contacts that have the Mailing State similar to the Account Billing State.
-	 * Example: getAccountsWithContactsByState('001XXXXXXXXXXXX') should return a list of Contacts that have the same Mailing State as the Account with the Id
+	 * Example: getAccountsWithContactsByState('001XXXXXXXXXXXX') should return a list of Contacts 
+	 * that have the same Mailing State as the Account with the Id
 	 * @param Account Id
 	 * @return List of contacts with the same Mailing State as the Account Billing State
 	 */
 	public static List<Contact> getAccountsWithContactsByState(Id accountId) {
 		// Query the Account
-
+		Account a = [SELECT BillingState FROM Account WHERE Id = :accountId LIMIT 1];
 		// Store the Account's BillingState
-
+		String billingState = a.billingState;
 		// Query the Contacts
-		return null; // Replace null with the variable you used to store the result
+		List<Contact> contact = [SELECT Name, MailingState FROM Contact WHERE MailingState = :billingState];
+		return contact; 
 	}
 
 	/**
@@ -393,7 +395,8 @@ public with sharing class SOQL {
 	 * Question 23
 	 * Clones and Inserts Opportunity Line Items from an original Opportunity to a list of cloned Opportunities.
 	 * Adds a randomized number between 1 to 3 to the quantity of each line item.
-	 * Example: cloneLineItems('001XXXXXXXXXXXX', [list of opportunity ids]) should clone the line items from the Opportunity with the Id to each Opportunity in the list
+	 * Example: cloneLineItems('001XXXXXXXXXXXX', [list of opportunity ids]) should clone the line items from the 
+	 * Opportunity with the Id to each Opportunity in the list
 	 * @param Original Opportunity Id
 	 * @param List of cloned Opportunity Ids
 	 */
@@ -424,7 +427,8 @@ public with sharing class SOQL {
 
 	/**
 	 * Question 25
-	 * Sets the 'Primary_Contact__c' field for all Closed Won Opportunities to the Contact on the associated Account with the alphabetically first first name.
+	 * Sets the 'Primary_Contact__c' field for all Closed Won Opportunities to the Contact on the associated Account 
+	 * with the alphabetically first first name.
 	 * Example: if there are two Contacts on the Account, "Billy" and "Abby," the 'Primary_Contact__c' will be set to "Abby."
 	 */
 	public static void setPrimaryContact() {
