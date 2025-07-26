@@ -321,10 +321,10 @@ public with sharing class SOQL {
 	 */
 	public static String getAccountNameForContact(String contactId) {
 		Contact c = [SELECT Account.Name FROM Contact Where Id = :contactId];
-	 if (c.Account != null) {
-        return c.Account.Name;
-    } else {
-        return null; // or return 'No Account' or throw an exception, depending on your use case
+		if (c.Account != null) {
+			return c.Account.Name;
+		} else {
+			return null; 
     }
 		
 	}
@@ -337,7 +337,15 @@ public with sharing class SOQL {
 	 * @return An Account record with related Opportunities.
 	 */
 	public static Account getAccountAndOpportunitiesFromAccountId(Id accountId) {
-		return null; // Replace null with the variable you used to store the result
+		Account a = [
+        SELECT Id, Name, 
+               (SELECT Id, Name, StageName, CloseDate FROM Opportunities)
+        FROM Account 
+        WHERE Id = :accountId
+        LIMIT 1
+    ];
+    
+    return a;
 	}
 
 	/**
